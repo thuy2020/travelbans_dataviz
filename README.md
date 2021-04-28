@@ -5,7 +5,8 @@ The full dataset is hosted here:
 https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/U6DJAC
 
 ## Overview of Border Closure Policies 
-![p_allpolicies](https://user-images.githubusercontent.com/47225333/116452471-9f466300-a812-11eb-8e27-15ca42f1d987.png)
+![p_allpolicies](https://user-images.githubusercontent.com/47225333/116453841-2cd68280-a814-11eb-990c-3b1fb58384fd.png)
+
 
 
 
