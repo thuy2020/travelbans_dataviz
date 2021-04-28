@@ -5,11 +5,12 @@ The full dataset is hosted here:
 https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/U6DJAC
 
 ## Overview of Border Closure Policies 
-![p_allpolicies](https://user-images.githubusercontent.com/47225333/116454034-64452f00-a814-11eb-8e33-d0a899494fb3.png)
 
+![p_allpolicies](https://user-images.githubusercontent.com/47225333/116454390-ca31b680-a814-11eb-8c6f-515f28e35d95.png)
 
 
 ## Countries with High Number of Border Closure Policies Issued 
-![p_more10](https://user-images.githubusercontent.com/47225333/116452047-20512a80-a812-11eb-8906-dc0f21182d04.png)
+
+![p_more10](https://user-images.githubusercontent.com/47225333/116454428-d584e200-a814-11eb-94d9-c87ea11cf638.png)
 
 
