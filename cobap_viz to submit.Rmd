@@ -1,0 +1,185 @@
+---
+title: "cobap visualization"
+author: "Thuy Nguyen"
+date: "12/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(readxl)
+library(tidyverse)
+library(dplyr)
+library(janitor)
+library(lubridate)
+library(ggplot2)
+
+# https://dataverse.harvard.edu/dataverse/COVIDBorderAccountabilityProjectCOBAP downloaded March 15, 2021
+# Matt's note: There was an issue with the ID numbers not matching for duplicate removal due to some extra spaces, sorry about that. # Please delete the norfolk policy from the CSV (row 337), and I will fix in the next release
+
+d <- rio::import(here::here("data", "policy_list.csv")) %>% 
+  select(-c(23)) %>% 
+  janitor::clean_names() %>% 
+  filter(country_name != "Norfolk Island")
+
+
+data <- d %>% 
+  mutate(start_asdate = lubridate::mdy(d$start_date), #mm_dd_yyyy
+         end_asdate = lubridate::mdy(d$end_date)) %>% 
+  select(c(country_name, iso3, policy_type, air, land, sea, start_asdate, end_asdate))
+```
+
+```{r number of border close policies}
+# data for the line chart
+ pd_line <- data %>% 
+  #count in week interval
+  select(country_name, iso3, start_asdate) %>% 
+  add_count(week = floor_date(start_asdate, "week")) %>% 
+  arrange(start_asdate) %>% 
+  drop_na()
+
+nrow(pd_line) 
+head(pd_line)
+
+pd_line %>% 
+  top_n(n, 10)
+
+```
+
+```{r}
+
+# plot
+  p <- pd_line %>% 
+  ggplot(aes(week, n)) +
+
+  geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
+   geom_text(label = "Pandemic declared (March 11)", 
+             size = 3, color = "#780A0B", hjust = -0.5,
+             x = as.Date("2020-02-26"), 
+             y = 250
+            ) + 
+  geom_point(aes(week, n), size = 6, shape = 21, fill = "#3E80B6", color = "#3E80B6") +
+
+  geom_line(color = "#3E80B6", size = 1) +
+  
+  geom_text(aes(label = n),
+            color = "white",
+            size = 3) + 
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %d") +
+  labs(x = "",
+       y = "",
+       title = "", 
+       subtitle = "",
+       caption = "") + 
+  theme_light() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.border = element_blank()
+  )
+p
+```
+
+```{r, fig.width= 11, fig.width=9}
+num_ban <- p + 
+        # North Korea; 
+    annotate(geom = "text", 
+                 x = as.Date("2020-01-22"), 
+                 y = .5,
+                label = "North\nKorea", vjust = -2, hjust = 0.9, color = "#3E80B6") +
+                
+    annotate("segment", x = as.Date("2020-01-20"), xend = as.Date("2020-01-20"), # arbitrary date
+               y = 35, yend = 3, colour = "#3E80B6", size=.5, alpha = .5) +   
+  
+  # the second week:  Mozambique, Viet Nam, Singapore, Georgia, Dominica, Israel, Guatemala, Italy, Pakistan, Russia, Kiribati, Kyrgyzstan, Palau
+ 
+  annotate(geom = "text", 
+                 x = as.Date("2020-01-26"), 
+                 y = .5,
+                label = "Mozambique\nViet Nam\nSingapore\nGeorgia\nDominica\nIsrael\nGuatemala\nItaly\nPakistan\nRussia\nKiribati\nKyrgyzstan\nPalau", vjust = - 0.8, hjust = 0, color = "#3E80B6") +
+                
+    annotate("segment", x = as.Date("2020-01-26"), xend = as.Date("2020-01-26"), 
+               y = 250, yend = 10, colour = "#3E80B6", size=.5, alpha = .5) 
+ num_ban
+ 
+ ggsave("num_ban.png", num_ban, width = 11, height = 9, units = "in")
+```
+
+complete-partial 1
+```{r}
+p_complete_partial1 <- complete_data %>% 
+  ggplot(aes(week, n)) +
+   # Pandemic line
+  geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
+   geom_text(label = "Pandemic declared (March 11)", 
+             size = 3, color = "#780A0B", hjust = -0.3,
+             x = as.Date("2020-02-26"), # arbitrary date to make sure the text does not cross the vline
+             y = 250
+            ) + 
+  geom_line(color = "#A8DBD9", size = 1)+
+  geom_point(aes(week, n), size = 6, shape = 21, fill = "#A8DBD9", color = "#A8DBD9") +
+    #show values inside the point
+  geom_text(aes(label = n),
+            color = "white",
+            size = 3) +
+  # show values of partial 
+  geom_line(data = partial_data, color = "#FFC6C4", size = 1)+
+   
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %d") +
+  labs(x = "",
+       y = "",
+       title = "", 
+       subtitle = "",
+       caption = "") + 
+  theme_light() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.border = element_blank()
+  )
+
+p_complete_partial1
+```
+
+
+complete-partial 2
+
+```{r}
+partial_data <- data %>% 
+
+  filter(policy_type == "PARTIAL") %>% 
+  select(policy_type, country_name, iso3, start_asdate) %>% 
+  add_count(week = floor_date(start_asdate, "week")) %>% 
+  arrange(start_asdate) %>% 
+  drop_na()
+
+p_complete_partial2 <- partial_data %>% 
+  ggplot(aes(week, n)) +
+
+  geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
+   geom_text(label = "Pandemic declared (March 11)", 
+             size = 3, color = "#780A0B", hjust = -0.3,
+             x = as.Date("2020-02-26"), 
+             y = 250
+            ) + 
+  geom_line(color = "#FFC6C4", size = 1)+
+  geom_point(aes(week, n), size = 6, shape = 21, fill = "#FFC6C4", color = "#FFC6C4") +
+
+  geom_text(aes(label = n),
+            color = "white",
+            size = 3) +
+  
+  geom_line(data = complete_data, color = "#A8DBD9", size = 1) +
+  
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %d") +
+  labs(x = "",
+       y = "",
+       title = "", 
+       subtitle = "",
+       caption = "") + 
+  theme_light() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.border = element_blank()
+  )
+
+p_complete_partial2
+```
