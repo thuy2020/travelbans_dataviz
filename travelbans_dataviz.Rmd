@@ -1,9 +1,8 @@
 ---
-title: "COBAP Dataset - Visualization for Scientific Data"
-author: "TN"
-output:
-  html_document: default
-  pdf_document: default
+title: "International Travel Bans Policies in the COVID-19 pandemic year 2020"
+author: "Thuy Nguyen"
+date: "12/1/2020"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -15,41 +14,19 @@ library(janitor)
 library(lubridate)
 library(ggplot2)
 
-# matthew.amme@gmail.com sent to thuyvei@gmail Dec 7
+# https://dataverse.harvard.edu/dataverse/COVIDBorderAccountabilityProjectCOBAP downloaded March 15, 2021
 
-d <- rio::import(here::here("data", "Public-Facing Data Format Draft COBAP_Dec7.xlsx")) %>% 
+d <- rio::import(here::here("data", "policy_list.csv")) %>% 
   select(-c(23)) %>% 
-  janitor::clean_names() 
-head(d)
-```
+  janitor::clean_names() %>% 
+  filter(country_name != "Norfolk Island") 
 
-```{r}
-# transforming to date variables. Note: original date format MM_DD 
-# 1. add _2020, make a string --> 2. convert to date variable
-
-# With the Dec 2 data need to use this
-# data <- d %>% 
-#   mutate(start_asdate = lubridate::mdy(paste0(d$start_date, "_2020")), #mm_dd_yyyy
-#          end_asdate = lubridate::mdy(paste0(d$end_date, "_2020"))) %>% 
-#   select(c(country_name, iso3, policy_type, air, land, sea, start_asdate, end_asdate))
-  
 
 data <- d %>% 
-  mutate(start_asdate = lubridate::mdy(d$start_date), #mm_dd_yyyy
+  mutate(start_asdate = lubridate::mdy(d$start_date), # date format mm_dd_yyyy
          end_asdate = lubridate::mdy(d$end_date)) %>% 
   select(c(country_name, iso3, policy_type, air, land, sea, start_asdate, end_asdate))
-
-
-d %>% 
-filter(visa_list == "China, Hong Kong, Iran, Japan, South Korea, Macao, Singapore, Austria, Belgium, Croatia, Cyprus, Czechia, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Italy, Ireland, Latvia, Lithuania, Luxembourg, Malta, Netherlands, Portugal, Poland, Romania, Spain, Slovakia, Slovenia, Swedan, United States of America, United Kingdom")
-
-#Sint Maarten (id MS54) adopted the most comprehensive list of visa ban which included 35 countries and territories. 
-head(data)
-nrow(data)
 ```
-
-
-## Number of border close policy overtime (1-week interval)
 
 ```{r number of border close policies}
 # data for the line chart
@@ -63,22 +40,25 @@ nrow(data)
 nrow(pd_line) 
 head(pd_line)
 
+pd_line %>% 
+  top_n(n, 10)
+
 ```
 
-
 ```{r}
+
 # plot
   p <- pd_line %>% 
   ggplot(aes(week, n)) +
-     # Pandemic line first in the first layer to not cross other details
+
   geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
    geom_text(label = "Pandemic declared (March 11)", 
-             size = 3, color = "#780A0B", hjust = -0.3,
+             size = 3, color = "#780A0B", hjust = -0.5,
              x = as.Date("2020-02-26"), # arbitrary date to make sure the text does not cross the vline
              y = 250
             ) + 
   geom_point(aes(week, n), size = 6, shape = 21, fill = "#3E80B6", color = "#3E80B6") +
-    # the line
+
   geom_line(color = "#3E80B6", size = 1) +
   
   #show values inside the points
@@ -99,40 +79,63 @@ head(pd_line)
 p
 ```
 
-
-```{r}
-  # add label of countries at some points
-
- num_ban <- p + 
-      # the first North Korea
-                 # vjust: more negative value = higher vertically 
-  #hjust: more positive value = to left 
+```{r, fig.width= 11, fig.width=9}
+num_ban <- p + 
+        # North Korea; 
     annotate(geom = "text", 
                  x = as.Date("2020-01-22"), 
                  y = .5,
-                label = "North\nKorea", vjust = - 1, hjust = 0.9, color = "#3E80B6") +
+                label = "North\nKorea", vjust = -2, hjust = 0.9, color = "#3E80B6") +
                 
     annotate("segment", x = as.Date("2020-01-20"), xend = as.Date("2020-01-20"), # arbitrary date
-               y = 40, yend = 3, colour = "#3E80B6", size=.5, alpha = .5) +   
+               y = 50, yend = 3, colour = "#3E80B6", size=.5, alpha = .5) +   
   
-  # the second week 
+  # the second week:  Mozambique, Viet Nam, Singapore, Georgia, Dominica, Israel, Guatemala, Italy, Pakistan, Russia, Kiribati, Kyrgyzstan, Palau
  
   annotate(geom = "text", 
                  x = as.Date("2020-01-26"), 
                  y = .5,
-                label = "Vietnam\nSingapore\nDominica\nItaly\nPakistan\nAntigua and\nBarbuda\nIran\nIsrael\nKyrgyzstan\nRussia\nKiribati", vjust = - 0.23, hjust = 0, color = "#3E80B6") +
+                label = "Mozambique\nViet Nam\nSingapore\nGeorgia\nDominica\nIsrael\nGuatemala\nItaly\nPakistan\nRussia\nKiribati\nKyrgyzstan\nPalau", vjust = - 0.8, hjust = 0, color = "#3E80B6") +
                 
     annotate("segment", x = as.Date("2020-01-26"), xend = as.Date("2020-01-26"), 
-               y = 420, yend = 3, colour = "#3E80B6", size=.5, alpha = .5) 
+               y = 360, yend = 10, colour = "#3E80B6", size=.5, alpha = .5) 
  num_ban
-    
- # ggplotly(num_ban, dynamicTicks = TRUE) %>% 
-#   rangeslider()
-ggsave("numberpolicy.pdf", num_ban, width = 8, height = 4.5)
-  
+ 
+ # ggsave("num_ban.png", num_ban, width = 11, height = 9, units = "in")
 ```
 
-complete closure
+## Countries with high number of border close policies issued 
+
+There were 21 countries that issued more than 10 border close policies. 
+
+```{r lolitop}
+library(forcats)
+# countries issued more than 10 policies
+
+top10policies <- data %>% 
+  group_by(country_name) %>% 
+  count() %>% 
+  filter(n > 10) %>% 
+  mutate(country_name = forcats::fct_reorder(country_name, n)) %>% 
+  ggplot(aes(country_name, n)) +
+  geom_segment(aes(x = country_name, xend = country_name, y = 0, yend = n), color = "skyblue") +
+  geom_point(color = "orange", size = 3) +
+  labs(
+    title = "Countries issued more than 10 border close policies",
+    x = "",
+    y = "",
+    caption = "Source: Covid Border Accountability Project (COBAP)"
+  ) +
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+```
+
+## Complete vs partial policies 1
 
 ```{r}
 complete_data <- data %>% 
@@ -143,40 +146,6 @@ complete_data <- data %>%
   arrange(start_asdate) %>% 
   drop_na()
 
-
- p_complete <- complete_data %>% 
-  ggplot(aes(week, n)) +
-   # Pandemic line
-  geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
-   geom_text(label = "Pandemic declared (March 11)", 
-             size = 3, color = "#780A0B", hjust = -0.3,
-             x = as.Date("2020-02-26"), # arbitrary date to make sure the text does not cross the vline
-             y = 250
-            ) + 
-  geom_line(color = "#A8DBD9", size = 1)+
-  geom_point(aes(week, n), size = 6, shape = 21, fill = "#A8DBD9", color = "#A8DBD9") +
-    #show values inside the point
-  geom_text(aes(label = n),
-            color = "white",
-            size = 3) +
-   
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %d") +
-  labs(x = "",
-       y = "Count of policies",
-       title = "", 
-       subtitle = "",
-       caption = "") + 
-  theme_light() +
-  theme(
-    panel.grid.major.x = element_blank(),
-    panel.border = element_blank()
-  )
-p_complete
-
-ggsave("completepolicies.pdf", p_complete, width = 8, height = 4.5)
-```
-
-```{r}
 partial_data <- data %>% 
   #count in week interval
   filter(policy_type == "PARTIAL") %>% 
@@ -185,39 +154,6 @@ partial_data <- data %>%
   arrange(start_asdate) %>% 
   drop_na()
 
-p_partial <- partial_data %>% 
-  ggplot(aes(week, n)) +
-  # Pandemic line
-  geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
-   geom_text(label = "Pandemic declared (March 11)", 
-             size = 3, color = "#780A0B", hjust = -0.3,
-             x = as.Date("2020-02-26"), # arbitrary date to make sure the text does not cross the vline
-             y = 250
-            ) + 
-  geom_line(color = "#FFC6C4", size = 1)+
-  geom_point(aes(week, n), size = 6, shape = 21, fill = "#FFC6C4", color = "#FFC6C4") +
-    #show values inside the point
-  geom_text(aes(label = n),
-            color = "white",
-            size = 3) +
-   
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %d") +
-  labs(x = "",
-       y = "Count of policies",
-       title = "", 
-       subtitle = "",
-       caption = "") + 
-  theme_light() +
-  theme(
-    panel.grid.major.x = element_blank(),
-    panel.border = element_blank()
-  )
-p_partial
-
-ggsave("partialpolicies.pdf", p_partial, width = 8, height = 4.5)
-```
-comple-partial 1
-```{r}
 p_complete_partial1 <- complete_data %>% 
   ggplot(aes(week, n)) +
    # Pandemic line
@@ -249,72 +185,15 @@ p_complete_partial1 <- complete_data %>%
   )
 
 p_complete_partial1
-
-ggsave("p_complete_partial1.pdf", p_complete_partial1, width = 8, height = 4.5)
 ```
-
-comple-partial 2
 
 ```{r}
-partial_data <- data %>% 
-  #count in week interval
-  filter(policy_type == "PARTIAL") %>% 
-  select(policy_type, country_name, iso3, start_asdate) %>% 
-  add_count(week = floor_date(start_asdate, "week")) %>% 
-  arrange(start_asdate) %>% 
-  drop_na()
-
-p_complete_partial2 <- partial_data %>% 
-  ggplot(aes(week, n)) +
-  # Pandemic line
-  geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
-   geom_text(label = "Pandemic declared (March 11)", 
-             size = 3, color = "#780A0B", hjust = -0.3,
-             x = as.Date("2020-02-26"), # arbitrary date to make sure the text does not cross the vline
-             y = 250
-            ) + 
-  geom_line(color = "#FFC6C4", size = 1)+
-  geom_point(aes(week, n), size = 6, shape = 21, fill = "#FFC6C4", color = "#FFC6C4") +
-    #show values inside the point
-  geom_text(aes(label = n),
-            color = "white",
-            size = 3) +
-  # show the line of complete
-   geom_line(data = complete_data, color = "#A8DBD9", size = 1) +
-  
-  scale_x_date(date_breaks = "1 month", date_labels = "%b %d") +
-  labs(x = "",
-       y = "",
-       title = "", 
-       subtitle = "",
-       caption = "") + 
-  theme_light() +
-  theme(
-    panel.grid.major.x = element_blank(),
-    panel.border = element_blank()
-  )
-p_complete_partial2
-
-ggsave("p_complete_partial2.pdf", p_complete_partial2, width = 8, height = 4.5)
-```
-
-
-### Type of policy 
-
-We recorded 4 policy types: partial, complete, none, or no policy indicated. 
-
-```{r policy type, tree map }
 library(treemap)
 pd_treemap <- data %>% 
   #select(country_name, policy_type) %>% 
   group_by(policy_type) %>% 
   unique() %>% 
   add_count() 
-
-data %>% 
-  filter(policy_type == "PARTIAL")
-
-  
 
 treemap(
   pd_treemap,
@@ -327,11 +206,7 @@ treemap(
   border.col=c("white") # can add more border color
 )
 
-```
 
-```{r treemap}
-library(treemap)
-library(d3treeR)
 group <- c(rep("Complete closure",1), rep("Partial closure", 4))
 subgroup <- c(rep("Complete closure",1), rep("Border closure", 3), rep("Targeted ban", 1))
 subsubgroup <- c(rep("Complete closure",1), "Air", "Land", "Sea", "Targeted ban")
@@ -349,118 +224,10 @@ p_treemap <- treemap(data_treemap,
               c("right", "bottom")
             )  
           )    
-
-inter <- d3tree2(p_treemap,  rootname = "National-level travel restrictions policies" )
-
-# save the widget
-library(htmlwidgets)
-saveWidget(inter, "test.html")
 ```
 
-
-
-```{r treemap of table 1}
-group_tabl1 <- c(rep("Complete closure", 4), rep("Partial closure", 4))
-subgroup_tbl1 <- c(
-  "1.1 Essentials-only exception",
-  "1.2 Citizenship exception",
-  "1.3 Countries exception",
-  "1.4 Workers exception",
-  "2.1 Visa ban", 
-  "2.2 Citizenship ban", 
-  "2.3 Travel History Ban", 
-  "2.4 Border closure")
-value_tbl1 <- c(53, 224, 57, 78, 65, 46, 107, 342)
-data_treemap_tbl1 <- data.frame(group_tabl1, subgroup_tbl1, value_tbl1)
-
-p_treemap_tbl1 <- treemap(data_treemap_tbl1,
-            index=c("group_tabl1","subgroup_tbl1"),
-            vSize="value_tbl1",
-            type="index",
-            palette = "Set2",
-            bg.labels=c("white"),
-            align.labels=list(
-              c("center", "center"), 
-              c("right", "bottom")
-            )  
-          )    
-
-inter_tbl1 <- d3tree2(p_treemap_tbl1,  rootname = "Data dictionary" )
-
-saveWidget(inter_tbl1, "treemap_table1.html")
-```
-
-### Countries with high number of border close policies issued 
-
-There were 21 countries that issued more than 10 border close policies. 
-
-```{r lolitop}
-library(forcats)
-# countries issued more than 10 policies
-
-top10policies <- data %>% 
-  group_by(country_name) %>% 
-  count() %>% 
-  filter(n > 10) %>% 
-  mutate(country_name = forcats::fct_reorder(country_name, n)) %>% 
-  ggplot(aes(country_name, n)) +
-  geom_segment(aes(x = country_name, xend = country_name, y = 0, yend = n), color = "skyblue") +
-  geom_point(color = "orange", size = 3) +
-  labs(
-    title = "Countries issued more than 10 border close policies",
-    x = "",
-    y = "",
-    caption = "Source: Covid Border Accountability Project (COBAP)"
-  ) +
-  theme_light() +
-  coord_flip() +
-  theme(
-    panel.grid.major.y = element_blank(),
-    panel.border = element_blank(),
-    axis.ticks.y = element_blank()
-  )
-ggsave("morethan10policies.png", top10policies, width = 7.29, height = 4.51)
-```
-
-### Travel ban on land, air and sea 
-
-Countries set policies to specifically target some other countries most through air access. Sea access generally remains least targeted. 
-
-
-```{r restrictions target on land air sea access}
-#transform data to group type of regulation
-land_air_sea <- data %>% 
-  pivot_longer(cols = c(land, air, sea),
-               names_to = "access",
-               values_to = "target"
-               ) %>% 
-  drop_na() %>% 
-  filter(target != "NA") %>% 
-  group_by(access, target) %>% # to count number of target policy in each type of access land, air and sea
-  add_count(target) %>% 
-  select(access, target, n) %>% 
-  unique() # 3 access * 3 types of target = 9 values
-  
-# plot
-
-land_air_sea %>% 
-ggplot(aes(target, n)) +
-  geom_col(aes(fill = target)) +
-  geom_text(aes(label = n), color = "black", size = 3, vjust = -.7) +
-  facet_wrap(~ access) +
-  labs(x = "",
-       y = "Number of policies issued",
-       title = "Restrictions target on land, air, and sea access",
-       caption = "Source: Covid Border Accountability Project (COBAP)") +
-  scale_fill_brewer() +
-  theme_light()
-
-ggsave("target.png")
-```
 
 ### Who targets whom
-
-The current dataset records 11 countries with specific target policies. (Unless I read the data wrong, I believe the comprehensive list should be longer)
 
 ```{r table of who targets whom}
 library(gt)
@@ -472,124 +239,6 @@ select(country_name, targets_air, targets_land, targets_sea) %>%
          "Air" = targets_air,
          "Land" = targets_land,
          "Sea" = targets_sea) 
-
-# gt table 
-# gt_tbl <- gt(data = table)
-# 
-# gt_tbl %>% 
-#   tab_header(
-#     title = "Policies targets on air, land, and sea" # bold title
-#   ) %>% 
-#   tab_spanner(
-#     label = " Countries were restricted access through",
-#     columns = vars(Air, Land, Sea)
-#   ) %>% 
-#   tab_spanner(
-#     label = "Host",
-#     columns = vars(Country)
-#   ) %>% 
-#   tab_source_note(
-#     source_note = "Source: Covid Border Accountability Project (COBAP)"
-#   ) 
-
-# Or reactable
 reactable::reactable(table)
-```
-
-
-```{r, include = FALSE, eval=FALSE}
-data %>% 
-  select(air) %>% 
-  unique() 
-
-data %>% 
-  filter(air == "Specific") %>% 
-  count()
-
-data %>% 
-  filter(air == "No") %>% 
-  count()
-
-data %>% 
-  filter(air == "All") %>% 
-  count()
-
-# air, specific = 113, no = 306, all = 114
-data %>% 
-  select(land) %>% 
-  unique() 
-
-data %>% 
-  filter(land == "Specific") %>% 
-  count()
-data %>% 
-  filter(land == "No") %>% 
-  count()
-
-data %>% 
-  filter(land == "All") %>% 
-  count()
-# land, # air, specific = 87, no = 401, all = 45
-
-data %>% 
-  select(sea) %>% 
-  unique() 
-
-data %>% 
-  filter(sea == "Specific") %>% 
-  count()
-data %>% 
-  filter(sea == "No") %>% 
-  count()
-
-data %>% 
-  filter(sea == "All") %>% 
-  count()
-# sea, # air, specific = 27, no = 494, all = 12
-
-```
-
-
-```{r include = FALSE, eval=FALSE}
-data %>% 
-  select(work_excep) %>% 
-  unique()
-data %>% 
-  filter(work_excep == "No") %>% 
-  count()
-data %>% 
-  filter(work_excep == "Yes") %>% 
-  count()
-
-# work_excep no = 145, yes = 43
-```
-
-
-```{r include= FALSE, eval=FALSE}
-data %>% 
-  select(citizen_excep) %>% 
-  unique()
-data %>% 
-  filter(citizen_excep == "No") %>% 
-  count()
-data %>% 
-  filter(work_excep == "Yes") %>% 
-  count()
-
-# citizen exception no = 59
-```
-
-```{r include= FALSE, eval=FALSE}
-data %>% 
-  select(country_excep) %>% 
-  unique()
-data %>% 
-  filter(country_excep == "No") %>% 
-  count()
-data %>% 
-  filter(country_excep == "Yes") %>% 
-  count()
-
-# no country_excep 167
 ```
 
