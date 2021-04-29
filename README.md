@@ -1,16 +1,19 @@
-<<<<<<< HEAD
-International Travel Bans Policies in the COVID-19 pandemic year 2020
-================
-Thuy Nguyen
 
-## Introduction
+## International Border Closure Policies Due to COVID-19
+
+**Plots created by:** [Thuy
+Nguyen](https://www.linkedin.com/in/nguyendata/)
+
+### Introduction
 
 “The COVID Border Accountability Project (COBAP) provides a dataset of
 \>1000 policies systematized to reflect a complete timeline of new
 country-level restrictions on movement across international borders”.
 
-Our full dataset is hosted here:
-<https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/U6DJAC>
+Our full dataset is hosted on Harvard Dataverse here:
+<https://doi.org/10.7910/DVN/U6DJAC>
+
+### Read in data
 
 ``` r
 library(readxl)
@@ -22,8 +25,6 @@ library(ggplot2)
 library(forcats)
 ```
 
-## Read in data
-
 ``` r
 d <- rio::import(here::here("data", "policy_list.csv")) %>% 
   select(1:23) %>% 
@@ -33,8 +34,7 @@ d <- rio::import(here::here("data", "policy_list.csv")) %>%
 data <- d %>% 
   mutate(start_asdate = lubridate::mdy(d$start_date), # date format mm_dd_yyyy
          end_asdate = lubridate::mdy(d$end_date)) %>% 
-  select(c(country_name, iso3, policy_type, air, land, sea, start_asdate, end_asdate)) %>% 
-  drop_na()
+  select(c(country_name, iso3, policy_type, air, land, sea, start_asdate, end_asdate)) %>%   drop_na()
 ```
 
 ``` r
@@ -47,7 +47,7 @@ data <- d %>%
   drop_na()
 ```
 
-### Plot 1: Overall polices
+#### Plot 1: Overall polices
 
 ``` r
 # plot
@@ -84,7 +84,7 @@ data <- d %>%
   annotate(geom = "text", 
                  x = as.Date("2020-01-26"), 
                  y = .5,
-                label = "Mozambique\nSingapore\n", vjust = -4, hjust = 1, color = "#3E80B6") +
+                label = "Mozambique\nSingapore\n", vjust = -4, hjust = 0.95, color = "#3E80B6") +
   
   annotate(geom = "text", 
                  x = as.Date("2020-01-26"), 
@@ -92,7 +92,7 @@ data <- d %>%
                 label = "Israel\nItaly\nPakistan\nRussia\nPalau\nMongolia", vjust = -1, hjust = 0, color = "#3E80B6") +
                 
     annotate("segment", x = as.Date("2020-01-26"), xend = as.Date("2020-01-26"), 
-               y = 135, yend = 10, colour = "#3E80B6", size=.5, alpha = .5) +
+               y = 120, yend = 10, colour = "#3E80B6", size=.5, alpha = .5) +
   labs(x = "",
        y = "",
        title = "Number of Border Closure Policies Adopted Due to COVID - 19 by Countries", 
@@ -105,7 +105,7 @@ data <- d %>%
 
 ![](README_files/figure-gfm/plot%201-1.png)<!-- -->
 
-### Plot 2: Countries with high number of border close policies issued
+#### Plot 2: Countries with high number of border close policies issued
 
 ``` r
 # Countries issued more than 10 policies
@@ -139,17 +139,17 @@ ggplot(aes(country_name, n)) +
 #ggsave("p_more10.png", p_more10, width = 9, height = 7, units = "in")
 p_more10
 ```
-=======
->>>>>>> main
 
 ![](README_files/figure-gfm/plot2-1.png)<!-- -->
 
-Authors of the dataset: Shiraef, Mary A.; Weiss, Mark A.; Hirst, Cora;
-Walker, Bryn; Nguyen, Thuy; Kline, Camilla; Bhaskaran, Aadya; Beling,
-Elizabeth; Mattar, Layth; Amme, Matthew; Shum, Maggie; Sweere, Johanna;
-Brantley, Susanna; Schenoni, Luis; Lewis-Beck, Colin; Selvaraj,
-Yashwini; Jackson, Cayleigh; Lazar, Nikolas; Musetti, Rachel; Naseer,
-Sarah; Taylor, Noah; Gradie, Amalia; Yu, William, 2020, “The COVID
-Border Accountability Project (COBAP): Mapping Travel and Immigration
-Policy Responses to COVID-19”, <https://doi.org/10.7910/DVN/U6DJAC>,
-Harvard Dataverse, V21, UNF:6:51bUOj0lSRrMwups3A7RCg== \[fileUNF\]
+#### [Authors of the dataset](https://doi.org/10.7910/DVN/U6DJAC):
+
+Shiraef, Mary A.; Weiss, Mark A.; Hirst, Cora; Walker, Bryn; Nguyen,
+Thuy; Kline, Camilla; Bhaskaran, Aadya; Beling, Elizabeth; Mattar,
+Layth; Amme, Matthew; Shum, Maggie; Sweere, Johanna; Brantley, Susanna;
+Schenoni, Luis; Lewis-Beck, Colin; Selvaraj, Yashwini; Jackson,
+Cayleigh; Lazar, Nikolas; Musetti, Rachel; Naseer, Sarah; Taylor, Noah;
+Gradie, Amalia; Yu, William, 2020, “The COVID Border Accountability
+Project (COBAP): Mapping Travel and Immigration Policy Responses to
+COVID-19”, <https://doi.org/10.7910/DVN/U6DJAC>, Harvard Dataverse, V21,
+UNF:6:51bUOj0lSRrMwups3A7RCg== \[fileUNF\]
