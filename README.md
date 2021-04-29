@@ -1,7 +1,7 @@
 ## Introduction
 "The COVID Border Accountability Project (COBAP) provides a dataset of >1000 policies systematized to reflect a complete timeline of new country-level restrictions on movement across international borders". 
 
-The full dataset is hosted here: 
+Our full dataset is hosted here: 
 https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/U6DJAC
 
 ## Overview of Border Closure Policies 
