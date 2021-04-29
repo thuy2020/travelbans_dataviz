@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 International Travel Bans Policies in the COVID-19 pandemic year 2020
 ================
 Thuy Nguyen
@@ -138,6 +139,8 @@ ggplot(aes(country_name, n)) +
 #ggsave("p_more10.png", p_more10, width = 9, height = 7, units = "in")
 p_more10
 ```
+=======
+>>>>>>> main
 
 ![](README_files/figure-gfm/plot2-1.png)<!-- -->
 
