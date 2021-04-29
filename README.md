@@ -56,9 +56,9 @@ data <- d %>%
 
   geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
    geom_text(label = "Pandemic declared (March 11)", 
-             size = 3, color = "#780A0B", hjust = -0.5,
+             size = 4, color = "#780A0B", hjust = -0.2,
              x = as.Date("2020-02-26"), # arbitrary date to make sure the text does not cross the vline
-             y = 250
+             y = 230
             ) + 
   geom_point(aes(week, n), size = 6, shape = 21, fill = "#3E80B6", color = "#3E80B6") +
 
@@ -105,7 +105,7 @@ data <- d %>%
 
 ![](README_files/figure-gfm/plot%201-1.png)<!-- -->
 
-#### Plot 2: Countries with high number of border close policies issued
+#### Plot 2: Countries with high number of border closure policies issued
 
 ``` r
 # Countries issued more than 10 policies
