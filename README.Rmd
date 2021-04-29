@@ -1,22 +1,37 @@
 ---
 title: "International Travel Bans Policies in the COVID-19 pandemic year 2020"
 author: "Thuy Nguyen"
-date: "12/1/2020"
-output: html_document
+date: ""
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE
+)
+suppressPackageStartupMessages(library(ggplot2))
+theme_set(theme_light())
+```
+
+## Introduction
+"The COVID Border Accountability Project (COBAP) provides a dataset of >1000 policies systematized to reflect a complete timeline of new country-level restrictions on movement across international borders". 
+
+Our full dataset is hosted here: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/U6DJAC 
+
+```{r}
 library(readxl)
 library(tidyverse)
 library(dplyr)
 library(janitor)
 library(lubridate)
 library(ggplot2)
+library(forcats)
+```
 
-# Source: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/U6DJAC downloaded April 28, 2021
+## Read in data
 
-# Read in data
+```{r}
 d <- rio::import(here::here("data", "policy_list.csv")) %>% 
   select(1:23) %>% 
   janitor::clean_names() 
@@ -41,9 +56,9 @@ data <- d %>%
 
 ```
 
-## Plot 
+### Plot 1: Overall polices
 
-```{r plot, fig.width= 11, fig.width=9}
+```{r plot 1, fig.width=9, fig.height=7}
 # plot
   p_allpolicies <- pd_line %>% 
   ggplot(aes(week, n)) +
@@ -93,16 +108,14 @@ data <- d %>%
        subtitle = "11 policies were issued by 8 countries between Jan-26 to Feb-01-2020",
        caption = "Source: Covid Border Accountability Project (COBAP)") +
   theme_light()
-
+#ggsave("p_allpolicies.png", p_allpolicies, width = 9, height = 7, units = "in")
  p_allpolicies
- 
-ggsave("p_allpolicies.png", p_allpolicies, width = 9, height = 7, units = "in")
 ```
 
-## Countries with high number of border close policies issued 
+### Plot 2: Countries with high number of border close policies issued 
 
-```{r lolitop}
-library(forcats)
+```{r plot2, fig.width=9, fig.height=7}
+
 # Countries issued more than 10 policies
 more10policies <- data %>% 
   group_by(country_name) %>% 
@@ -130,7 +143,10 @@ ggplot(aes(country_name, n)) +
     panel.border = element_blank(),
     axis.ticks.y = element_blank()
   )
-ggsave("p_more10.png", p_more10, width = 10, height = 7, units = "in")
+
+#ggsave("p_more10.png", p_more10, width = 9, height = 7, units = "in")
+p_more10
 ```
 
-
+Authors of the dataset: 
+Shiraef, Mary A.; Weiss, Mark A.; Hirst, Cora; Walker, Bryn; Nguyen, Thuy; Kline, Camilla; Bhaskaran, Aadya; Beling, Elizabeth; Mattar, Layth; Amme, Matthew; Shum, Maggie; Sweere, Johanna; Brantley, Susanna; Schenoni, Luis; Lewis-Beck, Colin; Selvaraj, Yashwini; Jackson, Cayleigh; Lazar, Nikolas; Musetti, Rachel; Naseer, Sarah; Taylor, Noah; Gradie, Amalia; Yu, William, 2020, "The COVID Border Accountability Project (COBAP): Mapping Travel and Immigration Policy Responses to COVID-19", https://doi.org/10.7910/DVN/U6DJAC, Harvard Dataverse, V21, UNF:6:51bUOj0lSRrMwups3A7RCg== [fileUNF]
