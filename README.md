@@ -47,20 +47,19 @@ data <- d %>%
   drop_na()
 ```
 
-#### Plot 1: Overall polices
+#### Plot 1: Overall policies
 
 ``` r
 # plot
   p_allpolicies <- pd_line %>% 
   ggplot(aes(week, n)) +
-
-  geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "#780A0B") +
+  geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "orange") +
    geom_text(label = "Pandemic declared (March 11)", 
-             size = 4, color = "#780A0B", hjust = -0.2,
+             size = 5, color = "orange", hjust = -0.2,
              x = as.Date("2020-02-26"), # arbitrary date to make sure the text does not cross the vline
-             y = 230
-            ) + 
-  geom_point(aes(week, n), size = 6, shape = 21, fill = "#3E80B6", color = "#3E80B6") +
+            y = 230
+           ) + 
+    geom_point(aes(week, n), size = 6, shape = 21, fill = "#3E80B6", color = "#3E80B6") +
 
   geom_line(color = "#3E80B6", size = 1) +
   
@@ -74,7 +73,7 @@ data <- d %>%
     annotate(geom = "text", 
                  x = as.Date("2020-01-15"), 
                  y = .5,
-                label = "American\nSamoa", vjust = -1.5, hjust = 0.9, color = "#3E80B6") +
+                label = "American\nSamoa", vjust = -1.5, hjust = 0.9, color = "#FD69B3") +
                 
     annotate("segment", x = as.Date("2020-01-01"), xend = as.Date("2020-01-01"), 
                y = 27, yend = 3, colour = "#3E80B6", size=.5, alpha = .5) +   
@@ -84,26 +83,41 @@ data <- d %>%
   annotate(geom = "text", 
                  x = as.Date("2020-01-26"), 
                  y = .5,
-                label = "Mozambique\nSingapore\n", vjust = -4, hjust = 0.95, color = "#3E80B6") +
+                label = "Mozambique\nSingapore\n", vjust = -4, hjust = 0.95, color = "#FD69B3") +
   
   annotate(geom = "text", 
                  x = as.Date("2020-01-26"), 
                  y = .5,
-                label = "Israel\nItaly\nPakistan\nRussia\nPalau\nMongolia", vjust = -1, hjust = 0, color = "#3E80B6") +
+                label = "Israel\nItaly\nPakistan\nRussia\nPalau\nMongolia", vjust = -1, hjust = 0, color = "#FD69B3") +
                 
     annotate("segment", x = as.Date("2020-01-26"), xend = as.Date("2020-01-26"), 
                y = 120, yend = 10, colour = "#3E80B6", size=.5, alpha = .5) +
   labs(x = "",
-       y = "",
-       title = "Number of Border Closure Policies Adopted Due to COVID - 19 by Countries", 
-       subtitle = "11 policies were issued by 8 countries between Jan-26 to Feb-01-2020",
+       y = "Number of Policies Issued",
+       title = "Number of Border Closure Policies Adopted Due to COVID - 19 Worldwide", 
        caption = "Source: Covid Border Accountability Project (COBAP)") +
-  theme_light()
-#ggsave("p_allpolicies.png", p_allpolicies, width = 9, height = 7, units = "in")
- p_allpolicies
+  theme(
+    axis.title.y = element_text(colour = "white", size = 12),
+    axis.text.y = element_text(color="white",face = "bold", size = 12),
+    axis.text.x = element_text(color="white"),
+    plot.title = element_text(colour = "white", size = 18),
+    plot.subtitle = element_text(colour = "white"),
+    plot.caption = element_text(colour = "white"),
+    plot.background = element_rect(fill = "#193853"),
+    panel.background = element_rect(fill = "#193853"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+p_allpolicies
 ```
 
 ![](README_files/figure-gfm/plot%201-1.png)<!-- -->
+
+``` r
+#ggsave("p_allpolicies.png", p_allpolicies, width = 9, height = 7, units = "in")
+```
 
 #### Plot 2: Countries with high number of border closure policies issued
 
@@ -120,10 +134,11 @@ more10policies <- data %>%
   #plot
 p_more10 <- more10policies %>%   
 ggplot(aes(country_name, n)) +
-  geom_segment(aes(x = country_name, xend = country_name, y = 0, yend = n), color = "skyblue", size = 1) +
-  geom_point(color = "orange", size = 4) +
+  geom_segment(aes(x = country_name, xend = country_name, y = 0, yend = n), color = "skyblue", size = 2) +
+  geom_point(color = "orange", size = 6) +
   labs(
-    title = "Countries Issued More Than 10 Border Closure Policies\nRelated to COVID-19, Jan-2020 ~ Apr-2021",
+    title = "Countries Issued the Most Border Closure Policies",
+    subtitle = "Related to COVID-19, Jan-2020 to Apr-2021",
     x = "",
     y = "Number of Policy Issued",
     caption = "Source: Covid Border Accountability Project (COBAP)"
@@ -131,16 +146,28 @@ ggplot(aes(country_name, n)) +
   theme_light() +
   coord_flip() +
   theme(
+    axis.title.x = element_text(colour = "white", size = 15),
+    axis.text.y = element_text(color="white", 
+                           size=14),
+    axis.text.x = element_text(face="bold", color="white", 
+                           size=14),
+    plot.title = element_text(colour = "white", size = 18),
+    plot.subtitle = element_text(colour = "white"),
+    plot.caption = element_text(colour = "white"),
+    plot.background = element_rect(fill = "#1B2547"),
+    panel.background = element_rect(fill = "#1B2547"),
     panel.grid.major.y = element_blank(),
     panel.border = element_blank(),
     axis.ticks.y = element_blank()
   )
-
-#ggsave("p_more10.png", p_more10, width = 9, height = 7, units = "in")
 p_more10
 ```
 
 ![](README_files/figure-gfm/plot2-1.png)<!-- -->
+
+``` r
+#ggsave("p_more10.png", p_more10, width = 9, height = 7, units = "in")
+```
 
 #### [Authors of the dataset](https://doi.org/10.7910/DVN/U6DJAC):
 
