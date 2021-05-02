@@ -27,71 +27,65 @@ library(forcats)
 
 ``` r
 d <- rio::import(here::here("data", "policy_list.csv")) %>% 
-  select(1:23) %>% 
-  janitor::clean_names() 
-
+  select(1:23) %>% janitor::clean_names() 
 # convert to date format, select needed columns
 data <- d %>% 
   mutate(start_asdate = lubridate::mdy(d$start_date), # date format mm_dd_yyyy
          end_asdate = lubridate::mdy(d$end_date)) %>% 
   select(c(country_name, iso3, policy_type, air, land, sea, start_asdate, end_asdate)) %>%   drop_na()
-```
-
-``` r
 # data for the line chart
  pd_line <- data %>% 
-  #count in week interval
   select(country_name, iso3, start_asdate) %>% 
-  add_count(week = floor_date(start_asdate, "week")) %>% 
-  arrange(start_asdate) %>% 
-  drop_na()
+  add_count(week = floor_date(start_asdate, "week")) %>%   #count in week interval
+  arrange(start_asdate) %>% drop_na()
 ```
 
 #### Plot 1: Overall policies
 
 ``` r
-# plot
-  p_allpolicies <- pd_line %>% 
+p_allpolicies <- pd_line %>% 
   ggplot(aes(week, n)) +
   geom_vline(xintercept = as.Date("2020-03-11"), linetype = "dotted", color = "orange") +
    geom_text(label = "Pandemic declared (March 11)", 
              size = 5, color = "orange", hjust = -0.2,
-             x = as.Date("2020-02-26"), # arbitrary date to make sure the text does not cross the vline
-            y = 230
-           ) + 
-    geom_point(aes(week, n), size = 6, shape = 21, fill = "#3E80B6", color = "#3E80B6") +
-
+             x = as.Date("2020-02-26"), y = 230) + 
+  geom_point(aes(week, n), size = 6, shape = 21, fill = "#3E80B6", color = "#3E80B6") +
   geom_line(color = "#3E80B6", size = 1) +
   
   #show values inside the points
-  geom_text(aes(label = n),
-            color = "white",
-            size = 3) + 
+  geom_text(aes(label = n), color = "white", size = 3) + 
   scale_x_date(date_breaks = "1 month", date_labels = "%b %d") +
  
   # First country to adop a boder closure American\Samoa; 
-    annotate(geom = "text", 
-                 x = as.Date("2020-01-15"), 
-                 y = .5,
+    annotate(geom = "text", x = as.Date("2020-01-15"), y = .5,
                 label = "American\nSamoa", vjust = -1.5, hjust = 0.9, color = "#FD69B3") +
-                
     annotate("segment", x = as.Date("2020-01-01"), xend = as.Date("2020-01-01"), 
-               y = 27, yend = 3, colour = "#3E80B6", size=.5, alpha = .5) +   
+               y = 25, yend = 3, colour = "#3E80B6", size=.5, alpha = .5) +   
   
   #countries adopted policies during the second week 2020-Jan-26 to end of 2020-Feb-01
- 
-  annotate(geom = "text", 
-                 x = as.Date("2020-01-26"), 
-                 y = .5,
+   annotate(geom = "text", x = as.Date("2020-01-26"), y = .5,
                 label = "Mozambique\nSingapore\n", vjust = -4, hjust = 0.95, color = "#FD69B3") +
-  
-  annotate(geom = "text", 
-                 x = as.Date("2020-01-26"), 
-                 y = .5,
+  annotate(geom = "text", x = as.Date("2020-01-26"), y = .5,
                 label = "Israel\nItaly\nPakistan\nRussia\nPalau\nMongolia", vjust = -1, hjust = 0, color = "#FD69B3") +
-                
-    annotate("segment", x = as.Date("2020-01-26"), xend = as.Date("2020-01-26"), 
-               y = 120, yend = 10, colour = "#3E80B6", size=.5, alpha = .5) +
+  annotate("segment", x = as.Date("2020-01-26"), xend = as.Date("2020-01-26"), 
+               y = 115, yend = 10, colour = "#3E80B6", size=.5, alpha = .5) +
+  
+  # additional info about the dataset - total policies 
+  annotate(geom = "text", x = as.Date("2020-11-01"), y = 170,
+                label = "#Policies coded", fontface = "bold", color = "white") +
+  annotate(geom = "text", x = as.Date("2021-01-20"), y = 170,
+                label = "1368",  fontface = "bold", size = 10, color = "orange") +
+    # about the dataset - total countries
+  annotate(geom = "text", x = as.Date("2020-11-01"), y = 150,
+                label = "#Countries covered", fontface = "bold", color = "white") +
+  annotate(geom = "text", x = as.Date("2021-01-20"), y = 150,
+                label = "196", fontface = "bold", size = 10, color = "orange") +
+  # about the dataset - complete policies 
+  annotate(geom = "text", x = as.Date("2020-10-25"), y = 130,
+                label = "#Complete closure policies", fontface = "bold", color = "white") +
+  annotate(geom = "text", x = as.Date("2021-01-20"), y = 130,
+                label = "432", fontface = "bold", size = 10, color = "orange") +
+  # labs and theme
   labs(x = "",
        y = "Number of Policies Issued",
        title = "Number of Border Closure Policies Adopted Worldwide Due to COVID-19", 
@@ -115,19 +109,13 @@ p_allpolicies
 
 ![](README_files/figure-gfm/plot%201-1.png)<!-- -->
 
-``` r
-#ggsave("p_allpolicies.png", p_allpolicies, width = 9, height = 7, units = "in")
-```
-
 #### Plot 2: Countries with high number of border closure policies issued
 
 ``` r
 # Countries issued more than 10 policies
 more10policies <- data %>% 
   group_by(country_name) %>% 
-  count() %>% 
-  filter(n > 10) %>%
-  arrange(desc(n)) %>% 
+  count() %>% filter(n > 10) %>% arrange(desc(n)) %>% 
   mutate(country_name = as.factor(country_name)) %>% 
   mutate(country_name = fct_relevel(country_name, "Cocos (Keeling) Islands", "Romania", "Latvia", "Cyprus", "Finland", "Germany", "American Samoa", "Austria", "Aruba", "Myanmar", "Brazil", "Curaçao", "Nepal", "Seychelles", "Spain"))
 
@@ -136,14 +124,11 @@ p_more10 <- more10policies %>%
 ggplot(aes(country_name, n)) +
   geom_segment(aes(x = country_name, xend = country_name, y = 0, yend = n), color = "skyblue", size = 2) +
   geom_point(color = "orange", size = 6) +
-  labs(
-    title = "Countries Issued the Most Border Closure Policies",
+  labs(title = "Countries Issued the Most Border Closure Policies",
     subtitle = "Related to COVID-19, Jan-2020 to Apr-2021",
     x = "",
     y = "Number of Policy Issued",
-    caption = "Source: Covid Border Accountability Project (COBAP)"
-  ) +
-  theme_light() +
+    caption = "Source: Covid Border Accountability Project (COBAP)") +
   coord_flip() +
   theme(
     axis.title.x = element_text(colour = "white", size = 15),
@@ -164,10 +149,6 @@ p_more10
 ```
 
 ![](README_files/figure-gfm/plot2-1.png)<!-- -->
-
-``` r
-#ggsave("p_more10.png", p_more10, width = 9, height = 7, units = "in")
-```
 
 #### [Authors of the dataset](https://doi.org/10.7910/DVN/U6DJAC):
 
