@@ -94,7 +94,7 @@ data <- d %>%
                y = 120, yend = 10, colour = "#3E80B6", size=.5, alpha = .5) +
   labs(x = "",
        y = "Number of Policies Issued",
-       title = "Number of Border Closure Policies Adopted Due to COVID - 19 Worldwide", 
+       title = "Number of Border Closure Policies Adopted Worldwide Due to COVID-19", 
        caption = "Source: Covid Border Accountability Project (COBAP)") +
   theme(
     axis.title.y = element_text(colour = "white", size = 12),
